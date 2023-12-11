@@ -7,9 +7,11 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -19,6 +21,7 @@ import id.aldin.cimb.test.dao.ResponseService;
 import id.aldin.cimb.test.entity.Product;
 import id.aldin.cimb.test.service.ProductService;
 import id.aldin.cimb.test.util.Constants;
+import id.aldin.cimb.test.util.DataNotFound;
 import id.aldin.cimb.test.dao.*;
 
 @RestController
@@ -30,8 +33,7 @@ public class ProductController {
 
 	@GetMapping(value = "/all")
 	@ResponseBody
-	public ResponseService getAllProduct()
-			throws Exception {
+	public ResponseService getAllProduct() throws Exception {
 		ResponseService responseService = new ResponseService();
 		try {
 
@@ -91,6 +93,45 @@ public class ProductController {
 			throw e;
 		}
 		return responseService;
-
 	}
+
+	@PutMapping("/{productId}")
+	@ResponseBody
+	public ResponseService updateProduct(@PathVariable UUID productId, @RequestBody Product updatedProduct)
+			throws Exception {
+		ResponseService responseService = new ResponseService();
+		try {
+			Product product = productService.updateProduct(productId, updatedProduct);
+			if (product == null) {
+				responseService.setResponseCode(Constants.RESPONSE.DATA_NOT_FOUND.getCode());
+				responseService.setResponseDesc(Constants.RESPONSE.DATA_NOT_FOUND.getDescription());
+			}
+			responseService.setResponseCode(Constants.RESPONSE.APPROVED.getCode());
+			responseService.setResponseDesc(Constants.RESPONSE.APPROVED.getDescription());
+			responseService.setData(product);
+		} catch (Exception e) {
+			throw e;
+		}
+		return responseService;
+	}
+
+	@DeleteMapping("/{productId}")
+	@ResponseBody
+	public ResponseService deleteProduct(@PathVariable UUID productId) throws Exception {
+		ResponseService responseService = new ResponseService();
+		try {
+			Product product = productService.deleteProduct(productId);
+			if (product == null) {
+				responseService.setResponseCode(Constants.RESPONSE.DATA_NOT_FOUND.getCode());
+				responseService.setResponseDesc(Constants.RESPONSE.DATA_NOT_FOUND.getDescription());
+			}
+			responseService.setResponseCode(Constants.RESPONSE.APPROVED.getCode());
+			responseService.setResponseDesc(Constants.RESPONSE.APPROVED.getDescription());
+			responseService.setData(product);
+		} catch (Exception e) {
+			throw e;
+		}
+		return responseService;
+	}
+
 }

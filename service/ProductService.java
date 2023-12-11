@@ -67,7 +67,7 @@ public class ProductService {
 		resp.setUpdateAt(new Date());
 
 		return productRepo.save(resp);
-		
+
 	}
 
 	private ResponseProduct createDaftarProduct(Product dao) {
@@ -80,10 +80,36 @@ public class ProductService {
 		productDto.setUpdatedAt(dao.getUpdateAt().toGMTString());
 		return productDto;
 	}
-	
+
 	public Optional<Product> getProductById(UUID productId) {
-        return productRepo.findById(productId);
-    }
+		return productRepo.findById(productId);
+	}
+
+	public Product updateProduct(UUID productId, Product updatedProduct) throws DataNotFound {
+		Optional<Product> existingProductOptional = productRepo.findById(productId);
+
+		if (!existingProductOptional.isEmpty()) {
+			Product existingProduct = existingProductOptional.get();
+			existingProduct.setName(updatedProduct.getName());
+			existingProduct.setPrice(updatedProduct.getPrice());
+			existingProduct.setQuantity(updatedProduct.getQuantity());
+			return productRepo.save(existingProduct);
+		} else {
+			throw new DataNotFound("Product with ID " + productId + " not found");
+		}
+	}
+
+	 public Product deleteProduct(UUID productId) throws DataNotFound {
+	        Optional<Product> productOptional = productRepo.findById(productId);
+
+	        if (productOptional.isPresent()) {
+	            Product deletedProduct = productOptional.get();
+	            productRepo.deleteById(productId);
+	            return deletedProduct;
+	        } else {
+	            throw new DataNotFound("Product with ID " + productId + " not found");
+	        }
+	    }
 
 	public static ResponseService setResponse(Constants.RESPONSE response, Object obj) throws Exception {
 		ResponseService res = new ResponseService();
